@@ -7,6 +7,7 @@ public class GameController : MonoBehaviour
     public static Action OnWinGame;
     public static Action<int> AddScore;
     public static Action OnFinishGame;
+    public static Action<bool> OnPauseGame;
 
     [SerializeField] private Field _field;
 
@@ -17,4 +18,5 @@ public class GameController : MonoBehaviour
 
     public void StartGame() => OnStartGame?.Invoke();
     public void FinishGame() => OnFinishGame?.Invoke();
+    public void PauseGame(bool value) => OnPauseGame?.Invoke(value);
 }

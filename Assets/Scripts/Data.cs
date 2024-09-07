@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Data : MonoBehaviour
@@ -7,6 +5,7 @@ public class Data : MonoBehaviour
     public static Data Instance;
 
     [SerializeField] private Wallet _wallet;
+    public Wallet Wallet => _wallet;
 
     public int Level { get; set; }
 

@@ -13,10 +13,24 @@ public class Wallet
     private int _score;
     private int _total;
 
+    public int Total 
+    { 
+        get => _total;
+        set 
+        {
+            _total = value;
+            _totalText.text = $"{TextUtility.GetColorText("Total:", 2)} {_total}";
+            PlayerPrefs.SetInt("SaveTotal", value);
+        } 
+    }
+
     public void Init()
     {
         GameController.AddScore += AddScore;
         GameController.OnStartGame += StartGame;
+        Total = PlayerPrefs.GetInt("SaveTotal", 0);
+        _record = PlayerPrefs.GetInt("SaveRecord", 0);
+        SetRecord();
     }
 
     private void StartGame() => SetGameScore(0);
@@ -32,8 +46,9 @@ public class Wallet
         if(_score > _record)
         {
             _record = _score;
-
+            PlayerPrefs.SetInt("SaveRecord", _record);
         }
+
         _recordText.text = $"{TextUtility.GetColorText("Record: ", 3)}\n{_record}";
     }
 }
