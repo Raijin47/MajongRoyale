@@ -19,6 +19,7 @@ public class Timer : MonoBehaviour
         GameController.OnPauseGame += PauseGame;
         GameController.OnStartGame += StartGame;
         GameController.OnFinishGame += FinishGame;
+        GameController.OnWinGame += FinishGame;
     }
 
     private void StartGame()
@@ -72,11 +73,16 @@ public class Timer : MonoBehaviour
 
     private void UpdateTimeUI()
     {
+        _timerText.text = GetTime();
+        _image.fillAmount = _currentTime / RequiredTime;
+    }
+
+    public string GetTime()
+    {
         int minutes = (int)(_currentTime / 60f);
         int seconds = (int)(_currentTime % 60f);
 
-        _timerText.text = minutes.ToString("0") + ":" + seconds.ToString("00");
-        _image.fillAmount = _currentTime / RequiredTime;
+        return minutes.ToString("0") + ":" + seconds.ToString("00");
     }
 
     private void PauseGame(bool isPause)
