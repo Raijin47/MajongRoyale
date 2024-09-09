@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class Field : MonoBehaviour
 {
-    [SerializeField] private Transform _content;
+    [SerializeField] private RectTransform _content;
     [SerializeField] private Cell _prefab;
     [SerializeField] private Sprite[] _sprites;
 
@@ -42,7 +43,7 @@ public class Field : MonoBehaviour
         get => _secondCell;
         set
         {
-            if(_cell[value.x, value.y].ID == _cell[_firstCell.x,_firstCell.y].ID)
+            if (_cell[value.x, value.y].ID == _cell[_firstCell.x, _firstCell.y].ID)
             {
                 IsSelected = false;
                 _secondCell = value;
@@ -81,7 +82,17 @@ public class Field : MonoBehaviour
 
     private void StartGame()
     {
-        for(int i = 0; i < _currentHeight * _currentWidth / 2; i++)
+        StartCoroutine(StartGameCoroutine());
+    }
+
+    private IEnumerator StartGameCoroutine()
+    {
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_content);
+        Canvas.ForceUpdateCanvases();
+
+        yield return null;
+
+        for (int i = 0; i < _currentHeight * _currentWidth / 2; i++)
         {
             int r = Random.Range(1, _sprites.Length);
             FreeID.Add(r);
@@ -104,11 +115,41 @@ public class Field : MonoBehaviour
     {
         if (_cell == null) return;
 
-        for (int y = 0; y < _currentHeight; y++)       
-            for (int x = 0; x < _currentWidth; x++)          
+        for (int y = 0; y < _currentHeight; y++)
+            for (int x = 0; x < _currentWidth; x++)
                 Destroy(_cell[x, y].gameObject);
 
         _cell = null;
+    }
+
+    public void ShuffleCells()
+    {
+        List<Cell> cellList = new List<Cell>();
+
+        for (int y = 0; y < _currentHeight; y++)
+        {
+            for (int x = 0; x < _currentWidth; x++)
+            {
+                cellList.Add(_cell[x, y]);
+            }
+        }
+
+        for (int i = 0; i < cellList.Count; i++)
+        {
+            int randomIndex = Random.Range(i, cellList.Count);
+            Cell temp = cellList[i];
+            cellList[i] = cellList[randomIndex];
+            cellList[randomIndex] = temp;
+        }
+
+        for (int y = 0; y < _currentHeight; y++)
+        {
+            for (int x = 0; x < _currentWidth; x++)
+            {
+                _cell[x, y] = cellList[y * _currentWidth + x];
+                _cell[x, y].Sprite = _sprites[FreeID[_cell[x, y].ID]];
+            }
+        }
     }
 
     private IEnumerator FindPath()
@@ -133,7 +174,16 @@ public class Field : MonoBehaviour
                     {
                         if (IsCompliant(cell3))
                         {
+                            Cell first = _cell[_firstCell.x, _firstCell.y];
+                            Cell second = _cell[_secondCell.x, _secondCell.y];
+
+                            Vector3[] poss = new Vector3[] { GetPos(cell), GetPos(cell2), GetPos(cell3), GetPos(_secondCell) };
                             ClearSelection();
+
+                            yield return MoveCell.MoveToPositions(first.transform.GetChild(0), second.transform.GetChild(0), poss);
+
+                            ClearImages(first, second);
+                            CheckWin();
                             yield break;
                         }
                         if (!IsClearPath(cell3)) break;
@@ -146,7 +196,17 @@ public class Field : MonoBehaviour
         }
 
         FirstCell = _secondCell;
+    }
 
+    private Vector3 GetPos(Vector2Int cell)
+    {
+        if (IsNotBorder(cell))
+        {
+            return _cell[cell.x, cell.y].transform.position;
+        }
+
+        Debug.Log($"Error find pos cell ({cell.x},{cell.y})");
+        return Vector3.zero;
     }
 
     private Vector2Int GetDirection(Vector2Int cell, Vector2Int dir)
@@ -177,23 +237,30 @@ public class Field : MonoBehaviour
         var first = _cell[_firstCell.x, _firstCell.y];
         var second = _cell[_secondCell.x, _secondCell.y];
 
-        first.Sprite = _sprites[0];
-        first.ID = 0;
 
-        second.Sprite = _sprites[0];
+        first.ID = 0;
         second.ID = 0;
 
         GameController.AddScore?.Invoke();
+    }
 
+    private void ClearImages(Cell first, Cell second)
+    {
+        second.Sprite = _sprites[0];
+        first.Sprite = _sprites[0];
+    }
+
+    private void CheckWin()
+    {
         if (IsComplated()) GameController.OnWinGame?.Invoke();
     }
 
     private bool IsComplated()
     {
-        for (int y = 0; y < _currentHeight; y++)        
-            for (int x = 0; x < _currentWidth; x++)           
-                if (_cell[x, y].ID != 0)               
-                    return false;              
+        for (int y = 0; y < _currentHeight; y++)
+            for (int x = 0; x < _currentWidth; x++)
+                if (_cell[x, y].ID != 0)
+                    return false;
         return true;
     }
 }
