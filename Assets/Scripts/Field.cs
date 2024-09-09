@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Field : MonoBehaviour
 {
@@ -22,8 +23,8 @@ public class Field : MonoBehaviour
     };
     private readonly Vector2 SelectedSize = new(1.3f, 1.3f);
 
-    private const int Height = 8;
-    private const int Width = 11;
+    private int _currentHeight;
+    private int _currentWidth;
 
     public Vector2Int FirstCell
     {
@@ -54,16 +55,20 @@ public class Field : MonoBehaviour
 
     public void Init()
     {
-        InitializeField();
         GameController.OnStartGame += StartGame;
     }
 
-    private void InitializeField()
+    public void InitializeField(int height, int width)
     {
-        _cell = new Cell[Width, Height];
-        for (int y = 0; y < Height; y++)
+        DeleteField();
+
+        _currentHeight = height;
+        _currentWidth = width;
+
+        _cell = new Cell[_currentWidth, _currentHeight];
+        for (int y = 0; y < _currentHeight; y++)
         {
-            for (int x = 0; x < Width; x++)
+            for (int x = 0; x < _currentWidth; x++)
             {
                 var newSlot = Instantiate(_prefab, _content);
                 newSlot.X = x;
@@ -76,16 +81,16 @@ public class Field : MonoBehaviour
 
     private void StartGame()
     {
-        for(int i = 0; i < Height * Width / 2; i++)
+        for(int i = 0; i < _currentHeight * _currentWidth / 2; i++)
         {
             int r = Random.Range(1, _sprites.Length);
             FreeID.Add(r);
             FreeID.Add(r);
         }
 
-        for (int y = 0; y < Height; y++)
+        for (int y = 0; y < _currentHeight; y++)
         {
-            for (int x = 0; x < Width; x++)
+            for (int x = 0; x < _currentWidth; x++)
             {
                 int r = Random.Range(0, FreeID.Count);
                 _cell[x, y].ID = FreeID[r];
@@ -93,6 +98,17 @@ public class Field : MonoBehaviour
                 FreeID.RemoveAt(r);
             }
         }
+    }
+
+    private void DeleteField()
+    {
+        if (_cell == null) return;
+
+        for (int y = 0; y < _currentHeight; y++)       
+            for (int x = 0; x < _currentWidth; x++)          
+                Destroy(_cell[x, y].gameObject);
+
+        _cell = null;
     }
 
     private IEnumerator FindPath()
@@ -143,7 +159,7 @@ public class Field : MonoBehaviour
 
     private bool IsNotBorder(Vector2Int cell)
     {
-        return cell.y < Height && cell.y >= 0 && cell.x < Width && cell.x >= 0;
+        return cell.y < _currentHeight && cell.y >= 0 && cell.x < _currentWidth && cell.x >= 0;
     }
 
     private bool IsClearPath(Vector2Int cell)
@@ -167,15 +183,15 @@ public class Field : MonoBehaviour
         second.Sprite = _sprites[0];
         second.ID = 0;
 
-        GameController.AddScore?.Invoke(5);
+        GameController.AddScore?.Invoke();
 
         if (IsComplated()) GameController.OnWinGame?.Invoke();
     }
 
     private bool IsComplated()
     {
-        for (int y = 0; y < Height; y++)        
-            for (int x = 0; x < Width; x++)           
+        for (int y = 0; y < _currentHeight; y++)        
+            for (int x = 0; x < _currentWidth; x++)           
                 if (_cell[x, y].ID != 0)               
                     return false;              
         return true;

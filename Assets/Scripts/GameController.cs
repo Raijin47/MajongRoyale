@@ -5,14 +5,16 @@ public class GameController : MonoBehaviour
 {
     public static Action OnStartGame;
     public static Action OnWinGame;
-    public static Action<int> AddScore;
+    public static Action AddScore;
     public static Action OnFinishGame;
+    public static Action OnTimeIsUp;
     public static Action<bool> OnPauseGame;
 
     [SerializeField] private Field _field;
 
     private void Start()
     {
+        Data.Instance.Init();
         _field.Init();
     }
 

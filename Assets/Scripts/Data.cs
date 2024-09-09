@@ -5,15 +5,20 @@ public class Data : MonoBehaviour
     public static Data Instance;
 
     [SerializeField] private Wallet _wallet;
-    public Wallet Wallet => _wallet;
+    [SerializeField] private Level _level;
 
-    public int Level { get; set; }
+    public Wallet Wallet => _wallet;
+    public Level Level => _level;
+
+
 
     private void Awake() => Instance = this;
 
-    private void Start()
+    public void Init()
     {
         _wallet.Init();
-        Level = 2;
+        _level.Init();
     }
+
+
 }

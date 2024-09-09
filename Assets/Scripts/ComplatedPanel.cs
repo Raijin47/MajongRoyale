@@ -3,13 +3,14 @@ using UnityEngine;
 
 public class ComplatedPanel : MonoBehaviour
 {
-    [SerializeField] private GameObject _winPanel, _gamePanel;
+    [SerializeField] private GameObject _resultPanel, _gamePanel;
     [SerializeField] private Timer _timer;
     [SerializeField] private TextMeshProUGUI _resultTimerText, _resultScoreText, _resultText;
 
     private void Start()
     {
         GameController.OnWinGame += WinGame;
+        GameController.OnTimeIsUp += TimeIsUp;
     }
 
     private void TimeIsUp()
@@ -26,7 +27,7 @@ public class ComplatedPanel : MonoBehaviour
 
     private void UpdateUI()
     {
-        _winPanel.SetActive(true);
+        _resultPanel.SetActive(true);
         _gamePanel.SetActive(false);
         _resultTimerText.text = $"{TextUtility.GetColorText("Time left:", 2)} {_timer.GetTime()}";
         _resultScoreText.text = $"{TextUtility.GetColorText("Score:", 2)} {Data.Instance.Wallet.Score}";

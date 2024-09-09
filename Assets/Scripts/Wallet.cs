@@ -19,7 +19,7 @@ public class Wallet
         set 
         {
             _total = value;
-            _totalText.text = $"{TextUtility.GetColorText("Total:", 2)} {_total}";
+            _totalText.text = $"{TextUtility.GetColorText("Total:", 2)} {value}";
             PlayerPrefs.SetInt("SaveTotal", value);
         } 
     }
@@ -35,9 +35,9 @@ public class Wallet
         SetRecord();
     }
 
-    private void AddScore(int value)
+    private void AddScore()
     {
-        _score += value;
+        _score += 5;
         _scoreText.text = $"{TextUtility.GetColorText("Score", 0)} {_score}";
     }
         

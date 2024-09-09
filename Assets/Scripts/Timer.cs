@@ -20,6 +20,7 @@ public class Timer : MonoBehaviour
         GameController.OnStartGame += StartGame;
         GameController.OnFinishGame += FinishGame;
         GameController.OnWinGame += FinishGame;
+        GameController.AddScore += AddTime;
     }
 
     private void StartGame()
@@ -62,13 +63,20 @@ public class Timer : MonoBehaviour
                 if (_currentTime <= 0f)
                 {
                     _currentTime = 0;
-
+                    GameController.OnTimeIsUp?.Invoke();
                 }
 
                 UpdateTimeUI();
             }
             yield return null;
         }
+    }
+
+    private void AddTime()
+    {
+        _currentTime += 10;
+        if (_currentTime > RequiredTime) _currentTime = RequiredTime;
+        UpdateTimeUI();
     }
 
     private void UpdateTimeUI()
