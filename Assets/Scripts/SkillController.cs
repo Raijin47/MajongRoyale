@@ -35,7 +35,7 @@ public class SkillController : MonoBehaviour
 
         switch (id)
         {
-            case 0: Debug.Log("Heeeeelp!!!!"); break;
+            case 0: _field.FindAndPrintCollapsibleCells(); break;
             case 1: _timer.AddTime(30); break;
             case 2: _field.Shuffle(); break;
         }
