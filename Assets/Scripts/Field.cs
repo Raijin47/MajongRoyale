@@ -219,8 +219,12 @@ public class Field : MonoBehaviour
 
                         if (CanCollapseCells())
                         {
-                            _cell[firstCell.x, firstCell.y].transform.GetChild(0).localScale = Vector3.one * 0.7f;
-                            _cell[secondCell.x, secondCell.y].transform.GetChild(0).localScale = Vector3.one * 0.7f;
+
+                            _cell[firstCell.x, firstCell.y].transform.GetChild(0).localScale = Vector2.one * 1.2f;
+                            _cell[secondCell.x, secondCell.y].transform.GetChild(0).localScale = Vector2.one * 1.2f;
+
+                            StartCoroutine(HelpSearch.AnimateCell(_cell[firstCell.x, firstCell.y], _cell[secondCell.x, secondCell.y]));
+
                             //Anim(firstCell, secondCell);
                             return;
                         }
