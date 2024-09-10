@@ -14,8 +14,8 @@ public class Level
 
     private int _current;
    
-    public int Height => _height[_current > _height.Length ? _height.Length : _current];
-    public int Width => _width[_current > _width.Length ? _width.Length : _current];
+    public int Height => _height[_current >= _height.Length ? _height.Length - 1 : _current];
+    public int Width => _width[_current >= _width.Length ? _width.Length - 1 : _current];
 
     public int Current 
     {
@@ -27,7 +27,6 @@ public class Level
             PlayerPrefs.SetInt("SaveLevel", value);
 
             _grid.constraintCount = Width;
-            _field.InitializeField(Height, Width);
         }  
     }
 

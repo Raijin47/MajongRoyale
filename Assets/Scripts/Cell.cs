@@ -12,8 +12,11 @@ public class Cell : MonoBehaviour, IPointerDownHandler
     {
         set
         {
-            _image.sprite = value;
-            SetPos();
+            if(_image != null)
+            {
+                _image.sprite = value;
+                SetPos();
+            }
         }
     }
 
@@ -24,11 +27,17 @@ public class Cell : MonoBehaviour, IPointerDownHandler
 
     private void SetPos()
     {
-        if (_image != null)
+        _image.transform.SetParent(transform, false);
+        _image.transform.localPosition = Vector3.zero;
+        _image.transform.localScale = Vector3.one;
+    }
+
+    public void Selected(Vector2 size)
+    {
+        if(_image != null)
         {
-            _image.transform.SetParent(transform, false);
-            _image.transform.localPosition = Vector3.zero;
-            _image.transform.localScale = Vector3.one;
+            _image.transform.localScale = size;
+            AudioController.Instance.Play(1);
         }
     }
 

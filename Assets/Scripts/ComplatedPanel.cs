@@ -1,11 +1,14 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ComplatedPanel : MonoBehaviour
 {
     [SerializeField] private GameObject _resultPanel, _gamePanel;
     [SerializeField] private Timer _timer;
-    [SerializeField] private TextMeshProUGUI _resultTimerText, _resultScoreText, _resultText;
+    [SerializeField] private Image _resultImage;
+    [SerializeField] private TextMeshProUGUI _resultTimerText, _resultScoreText;
+    [SerializeField] private Sprite[] _resultSprites;
 
     private void Start()
     {
@@ -16,13 +19,15 @@ public class ComplatedPanel : MonoBehaviour
     private void TimeIsUp()
     {
         UpdateUI();
-        _resultText.text = "TIME IS UP!";
+        _resultImage.sprite = _resultSprites[0];
+        AudioController.Instance.Play(3);
     }
 
     private void WinGame()
     {
         UpdateUI();
-        _resultText.text = "LEVEL COMPLETE!";
+        _resultImage.sprite = _resultSprites[1];
+        AudioController.Instance.Play(4);
     }
 
     private void UpdateUI()

@@ -26,16 +26,17 @@ public class Field : MonoBehaviour
 
     private int _currentHeight;
     private int _currentWidth;
+    private bool _isGameActive;
 
     public Vector2Int FirstCell
     {
         get => _firstCell;
         set
         {
-            _cell[_firstCell.x, _firstCell.y].Rect.localScale = Vector2.one;
+            _cell[_firstCell.x, _firstCell.y].Selected(Vector2.one);
             IsSelected = true;
             _firstCell = value;
-            _cell[_firstCell.x, _firstCell.y].Rect.localScale = SelectedSize;
+            _cell[_firstCell.x, _firstCell.y].Selected(SelectedSize);
         }
     }
     public Vector2Int SecondCell
@@ -59,12 +60,13 @@ public class Field : MonoBehaviour
         GameController.OnStartGame += StartGame;
     }
 
-    public void InitializeField(int height, int width)
+    private void InitializeField()
     {
         DeleteField();
 
-        _currentHeight = height;
-        _currentWidth = width;
+        _currentHeight = Data.Instance.Level.Height;
+        _currentWidth = Data.Instance.Level.Width;
+
 
         _cell = new Cell[_currentWidth, _currentHeight];
         for (int y = 0; y < _currentHeight; y++)
@@ -80,8 +82,31 @@ public class Field : MonoBehaviour
         }
     }
 
+    public void Shuffle()
+    {
+        for (int y = 0; y < _currentHeight; y++)
+        {
+            for (int x = 0; x < _currentWidth; x++)
+            {
+                int randomX = Random.Range(0, _currentWidth);
+                int randomY = Random.Range(0, _currentHeight);
+
+                int oldID = _cell[x, y].ID;
+                int newID = _cell[randomX, randomY].ID;
+
+                _cell[randomX, randomY].ID = oldID;
+                _cell[randomX, randomY].Sprite = _sprites[oldID];
+
+                _cell[x, y].ID = newID;
+                _cell[x, y].Sprite = _sprites[newID];
+            }
+        }
+    }
+
     private void StartGame()
     {
+        _isGameActive = true;
+        InitializeField();
         StartCoroutine(StartGameCoroutine());
     }
 
@@ -122,36 +147,6 @@ public class Field : MonoBehaviour
         _cell = null;
     }
 
-    public void ShuffleCells()
-    {
-        List<Cell> cellList = new List<Cell>();
-
-        for (int y = 0; y < _currentHeight; y++)
-        {
-            for (int x = 0; x < _currentWidth; x++)
-            {
-                cellList.Add(_cell[x, y]);
-            }
-        }
-
-        for (int i = 0; i < cellList.Count; i++)
-        {
-            int randomIndex = Random.Range(i, cellList.Count);
-            Cell temp = cellList[i];
-            cellList[i] = cellList[randomIndex];
-            cellList[randomIndex] = temp;
-        }
-
-        for (int y = 0; y < _currentHeight; y++)
-        {
-            for (int x = 0; x < _currentWidth; x++)
-            {
-                _cell[x, y] = cellList[y * _currentWidth + x];
-                _cell[x, y].Sprite = _sprites[FreeID[_cell[x, y].ID]];
-            }
-        }
-    }
-
     private IEnumerator FindPath()
     {
         Vector2Int cell;
@@ -177,12 +172,14 @@ public class Field : MonoBehaviour
                             Cell first = _cell[_firstCell.x, _firstCell.y];
                             Cell second = _cell[_secondCell.x, _secondCell.y];
 
+                            int id = first.ID;
                             Vector3[] poss = new Vector3[] { GetPos(cell), GetPos(cell2), GetPos(cell3), GetPos(_secondCell) };
                             ClearSelection();
 
-                            yield return MoveCell.MoveToPositions(first.transform.GetChild(0), second.transform.GetChild(0), poss);
+                            first.Sprite = _sprites[0];
+                            second.Sprite = _sprites[0];
+                            yield return MoveCell.MoveToPositions(first.transform.GetChild(0), second.transform.GetChild(0), poss, _sprites[id]);
 
-                            ClearImages(first, second);
                             CheckWin();
                             yield break;
                         }
@@ -205,7 +202,6 @@ public class Field : MonoBehaviour
             return _cell[cell.x, cell.y].transform.position;
         }
 
-        Debug.Log($"Error find pos cell ({cell.x},{cell.y})");
         return Vector3.zero;
     }
 
@@ -237,22 +233,21 @@ public class Field : MonoBehaviour
         var first = _cell[_firstCell.x, _firstCell.y];
         var second = _cell[_secondCell.x, _secondCell.y];
 
-
         first.ID = 0;
         second.ID = 0;
 
         GameController.AddScore?.Invoke();
     }
 
-    private void ClearImages(Cell first, Cell second)
-    {
-        second.Sprite = _sprites[0];
-        first.Sprite = _sprites[0];
-    }
-
     private void CheckWin()
     {
-        if (IsComplated()) GameController.OnWinGame?.Invoke();
+        if (!_isGameActive) return;
+
+        if (IsComplated())
+        {
+            _isGameActive = false;
+            GameController.OnWinGame?.Invoke();
+        }
     }
 
     private bool IsComplated()

@@ -7,12 +7,14 @@ public class Timer : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _timerText;
     [SerializeField] private Image _image;
-
+    
     private Coroutine _timerUpdateCoroutine;
 
     private const float RequiredTime = 120;
     private float _currentTime;
     private bool _isGameReady;
+
+    private Tutorial _tutorial;
 
     private void Start()
     {
@@ -21,10 +23,13 @@ public class Timer : MonoBehaviour
         GameController.OnFinishGame += FinishGame;
         GameController.OnWinGame += FinishGame;
         GameController.AddScore += AddTime;
+
+        _tutorial = GetComponent<Tutorial>();
     }
 
     private void StartGame()
     {
+        if (_tutorial.IsTutorial) return;
         _currentTime = RequiredTime;
         _isGameReady = true;
 
@@ -72,9 +77,15 @@ public class Timer : MonoBehaviour
         }
     }
 
+    public void AddTime(int value)
+    {
+        _currentTime += value;
+        if (_currentTime > RequiredTime) _currentTime = RequiredTime;
+        UpdateTimeUI();
+    }
     private void AddTime()
     {
-        _currentTime += 10;
+        _currentTime += 3;
         if (_currentTime > RequiredTime) _currentTime = RequiredTime;
         UpdateTimeUI();
     }

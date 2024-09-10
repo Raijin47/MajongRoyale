@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class ButtonBase : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+public class ButtonBase : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler
 {
     #region Sub-Classes
     [System.Serializable]
@@ -36,6 +36,12 @@ public class ButtonBase : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             StopCoroutine(_resizeCoroutine);
 
         _resizeCoroutine = StartCoroutine(ResizeButton(_currentSize));
+
+    }
+
+    void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+    {
+        AudioController.Instance.Play(0);
     }
 
     private void OnEnable()
