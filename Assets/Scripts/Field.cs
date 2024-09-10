@@ -195,6 +195,77 @@ public class Field : MonoBehaviour
         FirstCell = _secondCell;
     }
 
+    public void FindAndPrintCollapsibleCells()
+    {
+        print("FindAndPrintCollapsibleCells");
+        for (int y1 = 0; y1 < _currentHeight; y1++)
+        {
+            for (int x1 = 0; x1 < _currentWidth; x1++)
+            {
+                Vector2Int firstCell = new Vector2Int(x1, y1);
+                if (_cell[x1, y1].ID == 0) continue;
+
+                for (int y2 = 0; y2 < _currentHeight; y2++)
+                {
+                    for (int x2 = 0; x2 < _currentWidth; x2++)
+                    {
+                        Vector2Int secondCell = new Vector2Int(x2, y2);
+                        if (firstCell == secondCell || _cell[x2, y2].ID == 0) continue;
+
+                        if (_cell[firstCell.x, firstCell.y].ID != _cell[secondCell.x,secondCell.y].ID) continue;
+
+                        _firstCell = firstCell;
+                        _secondCell = secondCell;
+
+                        if (CanCollapseCells())
+                        {
+                            _cell[firstCell.x, firstCell.y].transform.GetChild(0).localScale = Vector3.one * 0.7f;
+                            _cell[secondCell.x, secondCell.y].transform.GetChild(0).localScale = Vector3.one * 0.7f;
+                            //Anim(firstCell, secondCell);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        print("not found");
+    }
+
+    public bool CanCollapseCells()
+    {
+        Vector2Int cell;
+        Vector2Int cell2;
+        Vector2Int cell3;
+        Vector2Int direction2;
+        Vector2Int direction3;
+
+        for (int i = 0; i < Direction.Length; i++)
+        {
+            for (cell = _firstCell + Direction[i]; IsNotBorder(cell); cell += Direction[i])
+            {
+                direction2 = GetDirection(cell, Direction[i]);
+
+                for (cell2 = cell; IsNotBorder(cell2); cell2 += direction2)
+                {
+                    direction3 = GetDirection(cell2, direction2);
+
+                    for (cell3 = cell2; IsNotBorder(cell3); cell3 += direction3)
+                    {
+                        if (IsCompliant(cell3))
+                        {
+                            return true;
+                        }
+                        if (!IsClearPath(cell3)) break;
+                    }
+                    if (!IsClearPath(cell2)) break;
+                }
+                if (!IsClearPath(cell)) break;
+            }
+        }
+        return false;
+    }
+
     private Vector3 GetPos(Vector2Int cell)
     {
         if (IsNotBorder(cell))
